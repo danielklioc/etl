@@ -51,13 +51,14 @@ namespace etl
   /// CRC16 CCITT policy.
   /// Calculates CRC16 CCITT using polynomial 0x1021
   //***************************************************************************
+  template <const uint16_t INITIAL>
   struct crc_policy_16_ccitt
   {
     typedef uint16_t value_type;
 
     inline uint16_t initial() const
     {
-      return 0xFFFF;
+      return INITIAL;
     }
 
     inline uint16_t add(uint16_t crc, uint8_t value) const
@@ -94,14 +95,15 @@ namespace etl
   //*************************************************************************
   /// CRC16 CCITT
   //*************************************************************************
-  class crc16_ccitt : public etl::frame_check_sequence<etl::crc_policy_16_ccitt>
+  template <const uint16_t INITIAL>
+  class crc16_ccitt_base : public etl::frame_check_sequence<etl::crc_policy_16_ccitt<INITIAL> >
   {
   public:
 
     //*************************************************************************
     /// Default constructor.
     //*************************************************************************
-    crc16_ccitt()
+    crc16_ccitt_base()
     {
       this->reset();
     }
@@ -112,12 +114,18 @@ namespace etl
     /// \param end   End of the range.
     //*************************************************************************
     template<typename TIterator>
-    crc16_ccitt(TIterator begin, const TIterator end)
+    crc16_ccitt_base(TIterator begin, const TIterator end)
     {
       this->reset();
       this->add(begin, end);
     }
   };
+
+  /// CRC16 CCITT
+  typedef crc16_ccitt_base<0xFFFF> crc16_ccitt;
+
+  /// CRC16 CCITT XMODEM
+  typedef crc16_ccitt_base<0x0000> crc16_ccitt_xmodem;
 }
 
 #endif
